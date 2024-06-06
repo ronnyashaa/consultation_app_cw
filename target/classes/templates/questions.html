@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Questions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        header a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        header a:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+        h2, h4 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin-bottom: 10px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        ul li a {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 10px;
+            transition: color 0.3s ease;
+        }
+        ul li a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        .form-inline {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .form-inline h4 {
+            margin-bottom: 0;
+        }
+        .form-inline input, .form-inline button {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <a href="/logout">Вийти з акаунту</a>
+    </header>
+    <div>
+        <h4>Додати питання</h4>
+        <form th:action="@{/questions}" method="post">
+            <input type="text" name="theme" placeholder="Тема">
+            <textarea name="text" placeholder="Текст" cols="60" rows="5" style="resize: none;"></textarea>
+            <input type="text" name="keyword" placeholder="Ключові слова">
+            <button type="submit">Створити</button>
+        </form>
+        <div th:if="${param.error}" class="alert alert-danger" role="alert">
+            <span th:text="${param.error}"></span>
+        </div>
+    </div>
+    <div class="form-inline" style="margin-top: 10px">
+        <h4>Пошук питань</h4>
+        <form th:action="@{/questions/search}" method="get">
+            <input type="text" name="word" placeholder="Ключове слово" style="width: 200px;">
+            <button type="submit">Пошук</button>
+        </form>
+        <form th:action="@{/questions}" method="get">
+            <button type="submit">Скасувати</button>
+        </form>
+    </div>
+    <h2>Питання</h2>
+    <ul>
+        <li th:each="question : ${questions}">
+            <a th:href="@{/questions/{id}(id=${question.id})}" th:text="${question.theme}"></a>
+            <span th:if="${question.getIsAnswered()}" class="badge bg-success">[ВІДПОВІДЬ ОТРИМАНО]</span>
+            <p th:if="${!question.getKeywordsString().isBlank()}" th:text="'Ключові слова: ' + ${question.getKeywordsString()}"></p>
+            <form th:if="${question.getUser().getUsername() == user.getUsername()}"
+                  th:action="@{/questions/delete/{id}(id=${question.id})}"
+                  method="post">
+                <input type="hidden" name="_method" value="delete"/>
+                <button type="submit" class="btn btn-danger">Видалити</button>
+            </form>
+        </li>
+    </ul>
+</div>
+</body>
+</html>
